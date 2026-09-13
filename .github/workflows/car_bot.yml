@@ -1,4 +1,4 @@
-name: Kleinanzeigen Car Bot
+name: Kleinanzeigen Car Bot (Filtered Extraction)
 
 on:
   workflow_dispatch:
@@ -7,7 +7,7 @@ jobs:
   scrape-and-notify:
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # Allows bot to push seen_cars.json and results.csv back to GitHub
+      contents: write  # Allows bot to push state and CSV back to GitHub
 
     steps:
       - name: Checkout repository
@@ -21,18 +21,20 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Run Kleinanzeigen Scraper
+      - name: Run Kleinanzeigen Filtered Scraper
         env:
           SMTP_USER: ${{ secrets.SMTP_USER }}
           SMTP_PASS: ${{ secrets.SMTP_PASS }}
           ALERT_EMAIL: ${{ secrets.ALERT_EMAIL }}
           ALERT_EMAIL2: ${{ secrets.ALERT_EMAIL2 }}
+          SEARCH_URL: ${{ secrets.SEARCH_URL }}  # Optional secret to customize URL without code changes
+          MAX_PAGES: "3"
         run: python car_scraper.py
 
       - name: Commit and push updated cache and CSV results
         run: |
-          touch seen_cars.json results.csv
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          touch seen_cars.json results.csv
           git add seen_cars.json results.csv
-          git diff-index --quiet HEAD || (git commit -m "Auto-update car listings state & results [skip ci]" && git push)
+          git diff-index --quiet HEAD || (git commit -m "Auto-update car listings state & results.csv [skip ci]" && git push)
