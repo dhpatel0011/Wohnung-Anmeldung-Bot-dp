@@ -3,10 +3,11 @@
 # You can add search URLs for Kleinanzeigen, Mobile.de, AutoScout24, etc.
 
 # --- Kleinanzeigen Searches ---
-https://www.kleinanzeigen.de/s-autos/muenchen/sortierung:neuste/anzeige:angebote/preis::7000/c216l6411r30+autos.km_i:%2C100000+autos.schaden_s:nein+autos.tuevy_i:2028+autos.umweltplakette_s:4_gruen
+https://www.kleinanzeigen.de/s-autos/ingolstadt/sortierung:neuste/anzeige:angebote/preis::7000/c216l7586r50+autos.schaden_s:nein+autos.schadstoffklasse_s:euro4+autos.tuevy_i:2028%2C
 
 # --- Example Additional Searches (Uncomment to activate) ---
-# https://www.kleinanzeigen.de/s-autos/ingolstadt/preis::8000/c216l7662
+ 
+https://www.kleinanzeigen.de/s-autos/ingolstadt/preis::8000/c216l7662
 # https://suchen.mobile.de/fahrzeuge/search.html?maxPrice=7000&scopeId=C
-# https://www.autoscout24.de/lst?pricefrom=500&priceto=7000
+https://www.autoscout24.de/lst?pricefrom=500&priceto=7000
 https://www.kleinanzeigen.de/s-autos/muenchen/sortierung:neuste/anzeige:angebote/preis::7000/c216l6411r30+autos.km_i:%2C100000+autos.schaden_s:nein+autos.tuevy_i:2028+autos.umweltplakette_s:4_gruen
