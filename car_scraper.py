@@ -15,9 +15,10 @@ SMTP_PASS = os.environ.get("SMTP_PASS")
 ALERT_EMAIL = os.environ.get("ALERT_EMAIL")
 ALERT_EMAIL2 = os.environ.get("ALERT_EMAIL2", "")
 
-# Search parameters - Can be overridden via environment variable SEARCH_URL
+# Search parameters - Fallback to default if environment variable is missing or empty
 DEFAULT_SEARCH_URL = "https://www.kleinanzeigen.de/s-autos/muenchen/sortierung:neuste/anzeige:angebote/preis::7000/c216l6411r30+autos.km_i:%2C100000+autos.schaden_s:nein+autos.tuevy_i:2028+autos.umweltplakette_s:4_gruen"
-SEARCH_URL = os.environ.get("SEARCH_URL", DEFAULT_SEARCH_URL)
+env_url = os.environ.get("SEARCH_URL", "")
+SEARCH_URL = env_url.strip() if env_url and env_url.strip() else DEFAULT_SEARCH_URL
 
 # How many pages of search results to scrape (default: 3 pages)
 MAX_PAGES = int(os.environ.get("MAX_PAGES", "3"))
@@ -85,6 +86,9 @@ def scrape_page(url, headers):
         return None
 
 def main():
+    print(f"Starting Scraper with Target URL: {SEARCH_URL}")
+    print(f"Max Pages to Crawl: {MAX_PAGES}")
+
     # Guarantee cache and CSV file existence upfront
     if not os.path.exists(CACHE_FILE):
         with open(CACHE_FILE, "w", encoding="utf-8") as f:
@@ -160,32 +164,32 @@ def main():
                 new_cars.append(car_data)
                 seen_ids.add(ad_id)
 
-        # Check for Next Page link
+        # Check for next page pagination link
         next_page_elem = soup.find("a", class_="pagination-next")
         if next_page_elem and next_page_elem.get("href"):
             current_url = "https://www.kleinanzeigen.de" + next_page_elem.get("href")
-            time.sleep(2)
         else:
-            print("No next page link found. Reached end of search results.")
-            break
+            print("No next page link found. Finished crawling available pages.")
+            current_url = None
 
-    print(f"\nTotal new listings extracted: {len(new_cars)}")
+    print(f"\n==========================================")
+    print(f"Total new listings extracted: {len(new_cars)}")
+    print(f"==========================================")
 
     if new_cars:
-        # Save updated seen cache
+        # Save updated cache
         with open(CACHE_FILE, "w", encoding="utf-8") as f:
             json.dump(list(seen_ids), f, indent=2)
 
-        # Append structured data to CSV for Gemini Notebook
+        # Append to CSV file for Gemini Notebook
         with open(CSV_FILE, "a", newline="", encoding="utf-8") as f:
             writer = csv.DictWriter(f, fieldnames=[
                 "id", "title", "price", "price_numeric", "location", "date_posted", "description", "link", "image_url"
             ])
             writer.writerows(new_cars)
+        print(f"Saved {len(new_cars)} listings to {CSV_FILE}.")
 
-        print(f"Appended {len(new_cars)} listings to {CSV_FILE}.")
-
-        # Send alert notification
+        # Send email alert
         send_email_alert(new_cars)
 
 if __name__ == "__main__":
