@@ -18,7 +18,7 @@ SMTP_PASS = os.environ.get("SMTP_PASS")
 ALERT_EMAIL = os.environ.get("ALERT_EMAIL")
 ALERT_EMAIL2 = os.environ.get("ALERT_EMAIL2", "")
 
-DEFAULT_SEARCH_URL = "https://www.kleinanzeigen.de/s-autos/muenchen/sortierung:neuste/anzeige:angebote/preis::7000/c216l6411r30+autos.km_i:%2C100000+autos.schaden_s:nein+autos.tuevy_i:2028+autos.umweltplakette_s:4_gruen"
+DEFAULT_SEARCH_URL = "https://www.kleinanzeigen.de/s-autos/muenchen/sortierung:neuste/anzeige:angebote/preis::7000/c216l6411r50+autos.schaden_s:nein+autos.schadstoffklasse_s:euro4+autos.tuevy_i:2028%2C"
 env_url = os.environ.get("SEARCH_URL", "")
 SEARCH_URL = env_url.strip() if env_url and env_url.strip() else DEFAULT_SEARCH_URL
 
