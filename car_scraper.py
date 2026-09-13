@@ -3,11 +3,14 @@ import json
 import csv
 import re
 import time
-from curl_cffi import requests
 from bs4 import BeautifulSoup
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
 
 # Secrets loaded from environment variables
 SMTP_USER = os.environ.get("SMTP_USER")
@@ -15,19 +18,29 @@ SMTP_PASS = os.environ.get("SMTP_PASS")
 ALERT_EMAIL = os.environ.get("ALERT_EMAIL")
 ALERT_EMAIL2 = os.environ.get("ALERT_EMAIL2", "")
 
-# Search parameters - Fallback to default if environment variable is missing or empty
-DEFAULT_SEARCH_URL = "https://www.kleinanzeigen.de/s-autos/muenchen/sortierung:neuste/anzeige:angebote/preis::7000/c216l6411r50"
+DEFAULT_SEARCH_URL = "https://www.kleinanzeigen.de/s-autos/muenchen/sortierung:neuste/anzeige:angebote/preis::7000/c216l6411r30+autos.km_i:%2C100000+autos.schaden_s:nein+autos.tuevy_i:2028+autos.umweltplakette_s:4_gruen"
 env_url = os.environ.get("SEARCH_URL", "")
 SEARCH_URL = env_url.strip() if env_url and env_url.strip() else DEFAULT_SEARCH_URL
 
-# How many pages of search results to scrape (default: 3 pages)
-MAX_PAGES = int(os.environ.get("MAX_PAGES", "3"))
+MAX_PAGES = int(os.environ.get("MAX_PAGES", "2"))
 
 CACHE_FILE = "seen_cars.json"
 CSV_FILE = "results.csv"
 
+def get_driver():
+    options = Options()
+    options.add_argument("--headless")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--window-size=1920,1080")
+    options.add_argument(
+        "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+    )
+    return webdriver.Chrome(options=options)
+
 def parse_numeric_price(price_str):
-    """Extract numeric integer price from German price string (e.g., '6.990 € VB' -> 6990)."""
     if not price_str:
         return None
     clean_str = price_str.replace(".", "")
@@ -56,7 +69,7 @@ def send_email_alert(new_cars):
         if car['description']:
             body += f"  Description: {car['description'][:120]}...\n"
         body += f"  Link: {car['link']}\n\n"
-    body += "(Automated alert from Kleinanzeigen Car Bot - Filtered Extraction)\n"
+    body += "(Automated alert from Kleinanzeigen Car Bot - Selenium Edition)\n"
 
     msg = MIMEMultipart()
     msg["From"] = SMTP_USER
@@ -72,22 +85,9 @@ def send_email_alert(new_cars):
     except Exception as e:
         print(f"Failed to send email alert: {e}")
 
-def scrape_page(url, headers):
-    print(f"Fetching URL: {url}")
-    try:
-        response = requests.get(url, headers=headers, impersonate="chrome120", timeout=15)
-        if response.status_code == 200:
-            return BeautifulSoup(response.text, "html.parser")
-        else:
-            print(f"Failed to load page. HTTP Status: {response.status_code}")
-            return None
-    except Exception as e:
-        print(f"Error fetching page: {e}")
-        return None
-
 def main():
-    print(f"Starting Scraper with Target URL: {SEARCH_URL}")
-    print(f"Max Pages to Crawl: {MAX_PAGES}")
+    print(f"Starting Selenium Car Scraper...")
+    print(f"Target URL: {SEARCH_URL}")
 
     # Guarantee cache and CSV file existence upfront
     if not os.path.exists(CACHE_FILE):
@@ -108,88 +108,88 @@ def main():
         except Exception:
             seen_ids = set()
 
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-        "Accept-Language": "de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8"
-    }
-
+    driver = get_driver()
     new_cars = []
     current_url = SEARCH_URL
     page_count = 0
 
-    while current_url and page_count < MAX_PAGES:
-        page_count += 1
-        print(f"\n--- Scraping Page {page_count} of max {MAX_PAGES} ---")
-        soup = scrape_page(current_url, headers)
-        if not soup:
-            break
+    try:
+        while current_url and page_count < MAX_PAGES:
+            page_count += 1
+            print(f"\n--- Scraping Page {page_count} of max {MAX_PAGES} ---")
+            print(f"Loading: {current_url}")
+            
+            driver.get(current_url)
+            time.sleep(4)
 
-        articles = soup.find_all("article", class_="aditem")
-        print(f"Found {len(articles)} listings on page {page_count}.")
+            soup = BeautifulSoup(driver.page_source, "html.parser")
+            articles = soup.find_all("article", class_="aditem")
+            if not articles:
+                articles = soup.select("article[data-adid]")
+            
+            print(f"Found {len(articles)} listing element(s) on page {page_count}.")
 
-        for article in articles:
-            ad_id = article.get("data-adid")
-            if not ad_id or ad_id in seen_ids:
-                continue
+            for article in articles:
+                ad_id = article.get("data-adid")
+                if not ad_id or ad_id in seen_ids:
+                    continue
 
-            title_elem = article.find("a", class_="ellipsis")
-            price_elem = article.find("p", class_="aditem-main--middle--price-shipping--price")
-            location_elem = article.find("div", class_="aditem-main--top--left")
-            date_elem = article.find("div", class_="aditem-main--top--right")
-            desc_elem = article.find("p", class_="aditem-main--middle--description")
-            img_elem = article.find("img")
+                title_elem = article.find("a", class_="ellipsis")
+                price_elem = article.find("p", class_="aditem-main--middle--price-shipping--price")
+                location_elem = article.find("div", class_="aditem-main--top--left")
+                date_elem = article.find("div", class_="aditem-main--top--right")
+                desc_elem = article.find("p", class_="aditem-main--middle--description")
+                img_elem = article.find("img")
 
-            if title_elem and price_elem:
-                title = title_elem.text.strip()
-                price_str = price_elem.text.strip()
-                price_num = parse_numeric_price(price_str)
-                location = location_elem.text.strip().replace("\n", " ") if location_elem else ""
-                date_posted = date_elem.text.strip().replace("\n", " ") if date_elem else ""
-                description = desc_elem.text.strip().replace("\n", " ") if desc_elem else ""
-                link = "https://www.kleinanzeigen.de" + title_elem.get("href")
-                image_url = img_elem.get("src") or img_elem.get("data-imgsrc", "") if img_elem else ""
+                if title_elem and price_elem:
+                    title = title_elem.text.strip()
+                    price_str = price_elem.text.strip()
+                    price_num = parse_numeric_price(price_str)
+                    location = location_elem.text.strip().replace("\n", " ") if location_elem else ""
+                    date_posted = date_elem.text.strip().replace("\n", " ") if date_elem else ""
+                    description = desc_elem.text.strip().replace("\n", " ") if desc_elem else ""
+                    link = "https://www.kleinanzeigen.de" + title_elem.get("href")
+                    image_url = img_elem.get("src") or img_elem.get("data-imgsrc", "") if img_elem else ""
 
-                car_data = {
-                    "id": ad_id,
-                    "title": title,
-                    "price": price_str,
-                    "price_numeric": price_num if price_num is not None else "",
-                    "location": location,
-                    "date_posted": date_posted,
-                    "description": description,
-                    "link": link,
-                    "image_url": image_url
-                }
-                new_cars.append(car_data)
-                seen_ids.add(ad_id)
+                    car_data = {
+                        "id": ad_id,
+                        "title": title,
+                        "price": price_str,
+                        "price_numeric": price_num if price_num is not None else "",
+                        "location": location,
+                        "date_posted": date_posted,
+                        "description": description,
+                        "link": link,
+                        "image_url": image_url
+                    }
+                    new_cars.append(car_data)
+                    seen_ids.add(ad_id)
 
-        # Check for next page pagination link
-        next_page_elem = soup.find("a", class_="pagination-next")
-        if next_page_elem and next_page_elem.get("href"):
-            current_url = "https://www.kleinanzeigen.de" + next_page_elem.get("href")
-        else:
-            print("No next page link found. Finished crawling available pages.")
-            current_url = None
+            # Check next page link
+            next_page = soup.find("a", class_="pagination-next")
+            if next_page and next_page.get("href"):
+                current_url = "https://www.kleinanzeigen.de" + next_page.get("href")
+            else:
+                current_url = None
 
-    print(f"\n==========================================")
-    print(f"Total new listings extracted: {len(new_cars)}")
-    print(f"==========================================")
+    finally:
+        driver.quit()
+
+    print(f"\nTotal new listings extracted: {len(new_cars)}")
 
     if new_cars:
-        # Save updated cache
+        # Update JSON cache
         with open(CACHE_FILE, "w", encoding="utf-8") as f:
             json.dump(list(seen_ids), f, indent=2)
 
-        # Append to CSV file for Gemini Notebook
+        # Append to CSV
         with open(CSV_FILE, "a", newline="", encoding="utf-8") as f:
             writer = csv.DictWriter(f, fieldnames=[
                 "id", "title", "price", "price_numeric", "location", "date_posted", "description", "link", "image_url"
             ])
             writer.writerows(new_cars)
-        print(f"Saved {len(new_cars)} listings to {CSV_FILE}.")
 
-        # Send email alert
+        # Send Email Alert
         send_email_alert(new_cars)
 
 if __name__ == "__main__":
