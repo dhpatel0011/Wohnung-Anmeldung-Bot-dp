@@ -1,4 +1,4 @@
-name: Kleinanzeigen Car Bot (Selenium Edition)
+name: Kleinanzeigen Car Bot (Raw Extractor v6)
 
 on:
   workflow_dispatch:
@@ -7,7 +7,7 @@ jobs:
   scrape-and-notify:
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # Allows bot to push state and CSV back to GitHub
+      contents: write  # Allows workflow to push results.csv and seen_cars.json back to GitHub
 
     steps:
       - name: Checkout repository
@@ -18,10 +18,10 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install Python dependencies
+      - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Install Chrome
+      - name: Install Chrome Browser
         uses: browser-actions/setup-chrome@v1
 
       - name: Run Kleinanzeigen Scraper
@@ -30,13 +30,14 @@ jobs:
           SMTP_PASS: ${{ secrets.SMTP_PASS }}
           ALERT_EMAIL: ${{ secrets.ALERT_EMAIL }}
           ALERT_EMAIL2: ${{ secrets.ALERT_EMAIL2 }}
-          MAX_PAGES: "2"
+          SEARCH_URL: ${{ secrets.SEARCH_URL }}
+          MAX_PAGES: "3"
         run: python car_scraper.py
 
-      - name: Commit and push updated cache and CSV results
+      - name: Commit and push updated results and state
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           touch seen_cars.json results.csv
           git add seen_cars.json results.csv
-          git diff-index --quiet HEAD || (git commit -m "Auto-update car listings state & results.csv [skip ci]" && git push)
+          git diff-index --quiet HEAD || (git commit -m "Auto-update car listings dataset & state [skip ci]" && git push)
