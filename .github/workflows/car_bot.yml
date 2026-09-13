@@ -27,7 +27,7 @@ jobs:
           SMTP_PASS: ${{ secrets.SMTP_PASS }}
           ALERT_EMAIL: ${{ secrets.ALERT_EMAIL }}
           ALERT_EMAIL2: ${{ secrets.ALERT_EMAIL2 }}
-          SEARCH_URL: ${{ secrets.SEARCH_URL }}  # Optional secret to customize URL without code changes
+          SEARCH_URL: ${{ secrets.SEARCH_URL }}  # Optional secret, falls back to default in python script if empty
           MAX_PAGES: "3"
         run: python car_scraper.py
 
