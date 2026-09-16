@@ -7,7 +7,7 @@ jobs:
   scrape-and-notify:
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # Allows bot to push state and CSV back to GitHub
+      contents: write  # Allows GitHub Action to commit index.html & CSV back to repo
 
     steps:
       - name: Checkout repository
@@ -19,7 +19,9 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
       - name: Install Chrome
         uses: browser-actions/setup-chrome@v1
@@ -33,10 +35,16 @@ jobs:
           MAX_PAGES: "2"
         run: python car_scraper.py
 
-      - name: Commit and push updated results and state
+      - name: Generate Visual HTML Feed
+        run: |
+          if [ -f generate_visual_feed.py ]; then
+            python generate_visual_feed.py
+          fi
+
+      - name: Commit and Push Updated Results and Visual Feed
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          touch seen_cars.json results.csv urls.txt
-          git add seen_cars.json results.csv urls.txt
-          git diff-index --quiet HEAD || (git commit -m "Auto-update car listings, URLs & results.csv [skip ci]" && git push)
+          touch seen_cars.json results.csv urls.txt index.html
+          git add seen_cars.json results.csv urls.txt index.html
+          git diff-index --quiet HEAD || (git commit -m "Auto-update car listings & visual HTML feed [skip ci]" && git push)
