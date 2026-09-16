@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automated Car Market Feed</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f1f5f9; padding: 20px; margin: 0; }
+        .header { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto 20px auto; }
+        .header h1 { margin: 0; font-size: 24px; color: #0f172a; }
+        .header span { background: #2563eb; color: #fff; padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto; }
+        .card { background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.06); display: flex; flex-direction: column; transition: transform 0.2s; }
+        .card:hover { transform: translateY(-3px); }
+        .img-container { position: relative; width: 100%; height: 200px; background: #e2e8f0; }
+        .card-img { width: 100%; height: 100%; object-fit: cover; }
+        .platform-tag { position: absolute; top: 10px; left: 10px; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; color: #fff; text-transform: uppercase; }
+        .kleinanzeigen { background: #00838f; }
+        .autoscout24 { background: #e65100; }
+        .card-body { padding: 16px; display: flex; flex-direction: column; flex-grow: 1; justify-content: space-between; }
+        .title-price { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .title { margin: 0; font-size: 16px; color: #0f172a; line-height: 1.3; font-weight: 700; }
+        .price { font-size: 18px; font-weight: 800; color: #16a34a; white-space: nowrap; margin-left: 8px; }
+        .badges { margin-bottom: 12px; min-height: 24px; }
+        .badge { background: #f1f5f9; color: #334155; font-size: 11px; padding: 3px 8px; border-radius: 6px; margin-right: 4px; margin-bottom: 4px; display: inline-block; font-weight: 600; border: 1px solid #cbd5e1; }
+        .summary { margin: 0 0 14px 0; font-size: 12px; color: #475569; background: #f8fafc; padding: 8px 10px; border-left: 4px solid #2563eb; border-radius: 0 6px 6px 0; line-height: 1.4; }
+        .btn { display: block; text-align: center; color: #ffffff; text-decoration: none; padding: 10px; border-radius: 8px; font-weight: 700; font-size: 13px; transition: background 0.2s; }
+        .btn-kleinanzeigen { background: #00838f; }
+        .btn-kleinanzeigen:hover { background: #006064; }
+        .btn-autoscout24 { background: #e65100; }
+        .btn-autoscout24:hover { background: #bf360c; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚗 Vehicle Market Feed</h1>
+        <span>27 Listings</span>
+    </div>
+    <div class="grid">
+        <div class="card">
+            <div class="img-container">
+                <span class="platform-tag kleinanzeigen">Kleinanzeigen</span>
+                <img src="https://img.kleinanzeigen.de/api/v1/prod-ads/images/61/61e9151c-4d6f-48ed-86ea-0ba196c2d8c3?rule=$_2.AUTO" class="card-img" alt="Car Image" onerror="this.src='https://via.placeholder.com/400x250?text=No+Photo'">
+            </div>
+            <div class="card-body">
+                <div>
+                    <div class="title-price">
+                        <h3 class="title">Meriva 1 6 Tuev Service Neu Inkl Dachbox</h3>
+                        <span class="price">4.950 €</span>
+                    </div>
+                    <div class="badges"><span class="badge">TÜV Fresh</span></div>
+                    <p class="summary">✅ Active car listing matching your target search filters.</p>
+                </div>
+                <a href="https://www.kleinanzeigen.de/s-anzeige/meriva-1-6-tuev-service-neu-inkl-dachbox/3503775502-216-6311" target="_blank" class="btn btn-kleinanzeigen">💬 Message Owner on Kleinanzeigen</a>
+            </div>
+        </div>
+        <div class="card">
+            <div class="img-container">
+                <span class="platform-tag kleinanzeigen">Kleinanzeigen</span>
+                <img src="https://img.kleinanzeigen.de/api/v1/prod-ads/images/cf/cf3dbdfa-95da-460f-8d28-ca72067967a5?rule=$_2.AUTO" class="card-img" alt="Car Image" onerror="this.src='https://via.placeholder.com/400x250?text=No+Photo'">
+            </div>
+            <div class="card-body">
+                <div>
+                    <div class="title-price">
+                        <h3 class="title">Opel Zafira 1 8 16V Selection Executive Automatik</h3>
+                        <span class="price">4.780 €</span>
+                    </div>
+                    <div class="badges"><span class="badge">Automatic</span></div>
+                    <p class="summary">✅ Solid automatic transmission listing with good overall features.</p>
+                </div>
+                <a href="https://www.kleinanzeigen.de/s-anzeige/opel-zafira-1-8-16v-selection-executive-automatik/3512062418-216-5977" target="_blank" class="btn btn-kleinanzeigen">💬 Message Owner on Kleinanzeigen</a>
+            </div>
+        </div>
+        <div class="card">
+            <div class="img-container">
+                <span class="platform-tag kleinanzeigen">Kleinanzeigen</span>
+                <img src="https://img.kleinanzeigen.de/api/v1/prod-ads/images/2a/2a688636-aaac-417f-96c6-a11780daec7a?rule=$_2.AUTO" class="card-img" alt="Car Image" onerror="this.src='https://via.placeholder.com/400x250?text=No+Photo'">
+            </div>
+            <div class="card-body">
+                <div>
+                    <div class="title-price">
+                        <h3 class="title">Opel Astra Tt Cabrio Autom Ahk Tempom 140Ps Sehr Gepflegt</h3>
+                        <span class="price">4.950 €</span>
+                    </div>
+                    <div class="badges"><span class="badge">Automatic</span><span class="badge">Trailer Hitch</span></div>
+                    <p class="summary">✅ Solid automatic transmission listing with good overall features.</p>
+                </div>
+                <a href="https://www.kleinanzeigen.de/s-anzeige/opel-astra-tt-cabrio-autom-ahk-tempom-140ps-sehr-gepflegt/3501829533-216-6443" target="_blank" class="btn btn-kleinanzeigen">💬 Message Owner on Kleinanzeigen</a>
+            </div>
+        </div>
+        <div class="card">
+            <div class="img-container">
+                <span class="platform-tag kleinanzeigen">Kleinanzeigen</span>
+                <img src="https://img.kleinanzeigen.de/api/v1/prod-ads/images/52/526f8fe3-ad30-4c38-acc5-07c4c70eec60?rule=$_2.AUTO" class="card-img" alt="Car Image" onerror="this.src='https://via.placeholder.com/400x250?text=No+Photo'">
+            </div>
+            <div class="card-body">
+                <div>
+                    <div class="title-price">
+                        <h3 class="title">Mercedes Benz W124 E260</h3>
+                        <span class="price">5.500 €</span>
+                    </div>
+                    <div class="badges"></div>
+                    <p class="summary">✅ Active car listing matching your target search filters.</p>
+                </div>
+                <a href="https://www.kleinanzeigen.de/s-anzeige/mercedes-benz-w124-e260/3511823234-216-16377" target="_blank" class="btn btn-kleinanzeigen">💬 Message Owner on Kleinanzeigen</a>
+            </div>
+        </div>
+        <div class="card">
+            <div class="img-container">
+                <span class="platform-tag kleinanzeigen">Kleinanzeigen</span>
+                <img src="https://img.kleinanzeigen.de/api/v1/prod-ads/images/44/448c541a-ef0d-4119-bc1f-ffaccf42603f?rule=$_2.AUTO" class="card-img" alt="Car Image" onerror="this.src='https://via.placeholder.com/400x250?text=No+Photo'">
+            </div>
+            <div class="card-body">
+                <div>
+                    <div class="title-price">
+                        <h3 class="title">Renault Megane 2 Cc 92500 Km Tuev Neu</h3>
+                        <span class="price">3.000 €</span>
+                    </div>
+                    <div class="badges"><span class="badge">TÜV Fresh</span></div>
+                    <p class="summary">✅ Active car listing matching your target search filters.</p>
+                </div>
+                <a href="https://www.kleinanzeigen.de/s-anzeige/renault-megane-2-cc-92500-km-tuev-neu/3500881024-216-6448" target="_blank" class="btn btn-kleinanzeigen">💬 Message Owner on Kleinanzeigen</a>
+            </div>
+        </div>
+        <div class="card">
+            <div class="img-container">
+                <span class="platform-tag kleinanzeigen">Kleinanzeigen</span>
+                <img src="https://img.kleinanzeigen.de/api/v1/prod-ads/images/4d/4d737fdc-9e53-43a5-9f25-4215c70285c8?rule=$_2.AUTO" class="card-img" alt="Car Image" onerror="this.src='https://via.placeholder.com/400x250?text=No+Photo'">
+            </div>
+            <div class="card-body">
+                <div>
+                    <div class="title-price">
+                        <h3 class="title">Bmw 116I Garagenfahrzeug Bj 2008 Tuev 03 28</h3>
+                        <span class="price">4.990 €</span>
+                    </div>
+                    <div class="badges"><span class="badge">TÜV Fresh</span><span class="badge">Garage Kept</span></div>
+                    <p class="summary">🔥 High-value deal: Well maintained with documented service or garage storage.</p>
+                </div>
+                <a href="https://www.kleinanzeigen.de/s-anzeige/bmw-116i-garagenfahrzeug-bj-2008-tuev-03-28/3511773248-216-6452" target="_blank" class="btn btn-kleinanzeigen">💬 Message Owner on Kleinanzeigen</a>
+            </div>
+        </div>
+        <div class="card">
+            <div class="img-container">
+                <span class="platform-tag kleinanzeigen">Kleinanzeigen</span>
+                <img src="https://img.kleinanzeigen.de/api/v1/prod-ads/images/b3/b34e505c-6c9e-4128-a645-57680a28de1d?rule=$_2.AUTO" class="card-img" alt="Car Image" onerror="this.src='https://via.placeholder.com/400x250?text=No+Photo'">
+            </div>
+            <div class="card-body">
+                <div>
+                    <div class="title-price">
+                        <h3 class="title">Mercedes Glb 200</h3>
+                        <span class="price">999 € VB</span>
+                    </div>
+                    <div class="badges"></div>
+                    <p class="summary">✅ Active car listing matching your target search filters.</p>
+                </div>
+                <a href="https://www.kleinanzeigen.de/s-anzeige/mercedes-glb-200/3511438474-216-5540" target="_blank" class="btn btn-kleinanzeigen">💬 Message Owner on Kleinanzeigen</a>
+            </div>
+        </div>
+        <div class="card">
+            <div class="img-container">
+                <span class="platform-tag kleinanzeigen">Kleinanzeigen</span>
+                <img src="https://img.kleinanzeigen.de/api/v1/prod-ads/images/ed/ed9a22b1-dd0a-45ca-a340-f9afa1ef6321?rule=$_2.AUTO" class="card-img" alt="Car Image" onerror="this.src='https://via.placeholder.com/400x250?text=No+Photo'">
+            </div>
+            <div class="card-body">
+                <div>
+                    <div class="title-price">
+                        <h3 class="title">Bmw 320 D 120Kw 163Ps</h3>
+                        <span class="price">6.800 €</span>
+                    </div>
+                    <div class="badges"></div>
+                    <p class="summary">✅ Active car listing matching your target search filters.</p>
+                </div>
+                <a href="https://www.kleinanzeigen.de/s-anzeige/bmw-320-d-120kw-163ps/3510974077-216-6444" target="_blank" class="btn btn-kleinanzeigen">💬 Message Owner on Kleinanzeigen</a>
+            </div>
+        </div>
+        <div class="card">
+            <div class="img-container">
+                <span class="platform-tag kleinanzeigen">Kleinanzeigen</span>
+                <img src="https://img.kleinanzeigen.de/api/v1/prod-ads/images/5a/5a037d40-5ab7-44ff-a64a-2a106f7baf04?rule=$_2.AUTO" class="card-img" alt="Car Image" onerror="this.src='https://via.placeholder.com/400x250?text=No+Photo'">
+            </div>
+            <div class="card-body">
+                <div>
+                    <div class="title-price">
+                        <h3 class="title">Kia Picanto Fifa Edition Tuev Klima Shz Lhz Scheckheft Sparsam</h3>
+                        <span class="price">€ 5.890 VB</span>
+                    </div>
+                    <div class="badges"><span class="badge">TÜV Fresh</span><span class="badge">Full Service History</span><span class="badge">Air Conditioning</span><span class="badge">Heated Seats</span></div>
+                    <p class="summary">✅ Active car listing matching your target search filters.</p>
+                </div>
+                <a href="https://www.kleinanzeigen.de/s-anzeige/kia-picanto-fifa-edition-tuev-klima-shz-lhz-scheckheft-sparsam/3500256443-216-5593" target="_blank" class="btn btn-kleinanzeigen">💬 Message Owner on Kleinanzeigen</a>
+            </div>
+        </div>
+        <div class="card">
+            <div class="img-container">
+                <span class="platform-tag kleinanzeigen">Kleinanzeigen</span>
+                <img src="https://img.kleinanzeigen.de/api/v1/prod-ads/images/2c/2c89ac26-bab8-4910-b080-ced7d7ffc05e?rule=$_2.AUTO" class="card-img" alt="Car Image" onerror="this.src='https://via.placeholder.com/400x250?text=No+Photo'">
+            </div>
+            <div class="card-body">
+                <div>
+                    <div class="title-price">
+                        <h3 class="title">Leasinguebernahme Cupra Ateca Vz 2 0 Tsi 4Drive 300 Ps</h3>
+                        <span class="price">469 €</span>
+                    </div>
+                    <div class="badges"></div>
+                    <p class="summary">✅ Active car listing matching your target search filters.</p>
+                </div>
+                <a href="https://www.kleinanzeigen.de/s-anzeige/leasinguebernahme-cupra-ateca-vz-2-0-tsi-4drive-300-ps/3510850406-216-21624" target="_blank" class="btn btn-kleinanzeigen">💬 Message Owner on Kleinanzeigen</a>
+            </div>
+        </div>
+        <div class="card">
+            <div class="img-container">
+                <span class="platform-tag kleinanzeigen">Kleinanzeigen</span>
+                <img src="https://img.kleinanzeigen.de/api/v1/prod-ads/images/e2/e2853744-8ca2-4664-ae0c-096ab9d611e5?rule=$_2.AUTO" class="card-img" alt="Car Image" onerror="this.src='https://via.placeholder.com/400x250?text=No+Photo'">
+            </div>
+            <div class="card-body">
+                <div>
+                    <div class="title-price">
+                        <h3 class="title">Peugeot 207 1 4 16V Tuev 07 2028 126 974 Km</h3>
+                        <span class="price">1.100 € VB</span>
+                    </div>
+                    <div class="badges"><span class="badge">TÜV Fresh</span></div>
+                    <p class="summary">✅ Active car listing matching your target search filters.</p>
+                </div>
+                <a href="https://www.kleinanzeigen.de/s-anzeige/peugeot-207-1-4-16v-tuev-07-2028-126-974-km/3510846308-216-5599" target="_blank" class="btn btn-kleinanzeigen">💬 Message Owner on Kleinanzeigen</a>
+            </div>
+        </div>
+        <div class="card">
+            <div class="img-container">
+                <span class="platform-tag kleinanzeigen">Kleinanzeigen</span>
+                <img src="https://img.kleinanzeigen.de/api/v1/prod-ads/images/87/8746c758-cc29-44c6-9c3d-c9eb98f27cd7?rule=$_2.AUTO" class="card-img" alt="Car Image" onerror="this.src='https://via.placeholder.com/400x250?text=No+Photo'">
+            </div>
+            <div class="card-body">
+                <div>
+                    <div class="title-price">
+                        <h3 class="title">Volkswagen Golf 1 4 Comfortline Comfortline</h3>
+                        <span class="price">2.850 €</span>
+                    </div>
+                    <div class="badges"></div>
+                    <p class="summary">✅ Active car listing matching your target search filters.</p>
+                </div>
+                <a href="https://www.kleinanzeigen.de/s-anzeige/volkswagen-golf-1-4-comfortline-comfortline/3510832997-216-6456" target="_blank" class="btn btn-kleinanzeigen">💬 Message Owner on Kleinanzeigen</a>
+            </div>
+        </div>
+        <div class="card">
+            <div class="img-container">
+                <span class="platform-tag kleinanzeigen">Kleinanzeigen</span>
+                <img src="https://img.kleinanzeigen.de/api/v1/prod-ads/images/0e/0ebede50-ec38-4f56-821e-6f68599a4b98?rule=$_2.AUTO" class="card-img" alt="Car Image" onerror="this.src='https://via.placeholder.com/400x250?text=No+Photo'">
+            </div>
+            <div class="card-body">
+                <div>
+                    <div class="title-price">
+                        <h3 class="title">Citroen C1</h3>
+                        <span class="price">5.000 € VB</span>
+                    </div>
+                    <div class="badges"></div>
+                    <p class="summary">✅ Active car listing matching your target search filters.</p>
+                </div>
+                <a href="https://www.kleinanzeigen.de/s-anzeige/citroen-c1/3510689741-216-6528" target="_blank" class="btn btn-kleinanzeigen">💬 Message Owner on Kleinanzeigen</a>
+            </div>
+        </div>
+        <div class="card">
+            <div class="img-container">
+                <span class="platform-tag kleinanzeigen">Kleinanzeigen</span>
+                <img src="https://img.kleinanzeigen.de/api/v1/prod-ads/images/7f/7fc2ca45-5bc1-4f87-b9ea-a5056e7ffc76?rule=$_2.AUTO" class="card-img" alt="Car Image" onerror="this.src='https://via.placeholder.com/400x250?text=No+Photo'">
+            </div>
+            <div class="card-body">
+                <div>
+                    <div class="title-price">
+                        <h3 class="title">Mercedes Benz A 200 Cdi Avantgarde</h3>
+                        <span class="price">5.299 €</span>
+                    </div>
+                    <div class="badges"></div>
+                    <p class="summary">✅ Active car listing matching your target search filters.</p>
+                </div>
+                <a href="https://www.kleinanzeigen.de/s-anzeige/mercedes-benz-a-200-cdi-avantgarde/3510612998-216-6437" target="_blank" class="btn btn-kleinanzeigen">💬 Message Owner on Kleinanzeigen</a>
+            </div>
+        </div>
+        <div class="card">
+            <div class="img-container">
+                <span class="platform-tag kleinanzeigen">Kleinanzeigen</span>
+                <img src="https://img.kleinanzeigen.de/api/v1/prod-ads/images/40/4079fc10-4b5c-4644-a448-ed1302f16054?rule=$_2.AUTO" class="card-img" alt="Car Image" onerror="this.src='https://via.placeholder.com/400x250?text=No+Photo'">
+            </div>
+            <div class="card-body">
+                <div>
+                    <div class="title-price">
+                        <h3 class="title">Seat Ibiza Lim Stylance Style Automatik Wenig Km</h3>
+                        <span class="price">6.980 €</span>
+                    </div>
+                    <div class="badges"><span class="badge">Automatic</span></div>
+                    <p class="summary">✅ Solid automatic transmission listing with good overall features.</p>
+                </div>
+                <a href="https://www.kleinanzeigen.de/s-anzeige/seat-ibiza-lim-stylance-style-automatik-wenig-km-/3510595374-216-6481" target="_blank" class="btn btn-kleinanzeigen">💬 Message Owner on Kleinanzeigen</a>
+            </div>
+        </div>
+        <div class="card">
+            <div class="img-container">
+                <span class="platform-tag kleinanzeigen">Kleinanzeigen</span>
+                <img src="https://img.kleinanzeigen.de/api/v1/prod-ads/images/e1/e1438c42-a0c4-49ab-8659-8d5134ec4488?rule=$_2.AUTO" class="card-img" alt="Car Image" onerror="this.src='https://via.placeholder.com/400x250?text=No+Photo'">
+            </div>
+            <div class="card-body">
+                <div>
+                    <div class="title-price">
+                        <h3 class="title">Mercedes A 200 Cdi W169</h3>
+                        <span class="price">5.299 € VB</span>
+                    </div>
+                    <div class="badges"></div>
+                    <p class="summary">✅ Active car listing matching your target search filters.</p>
+                </div>
+                <a href="https://www.kleinanzeigen.de/s-anzeige/mercedes-a-200-cdi-w169/3510591417-216-6437" target="_blank" class="btn btn-kleinanzeigen">💬 Message Owner on Kleinanzeigen</a>
+            </div>
+        </div>
+        <div class="card">
+            <div class="img-container">
+                <span class="platform-tag kleinanzeigen">Kleinanzeigen</span>
+                <img src="https://img.kleinanzeigen.de/api/v1/prod-ads/images/ba/bab7300e-8ae4-43ef-a417-ac28303cbff0?rule=$_2.AUTO" class="card-img" alt="Car Image" onerror="this.src='https://via.placeholder.com/400x250?text=No+Photo'">
+            </div>
+            <div class="card-body">
+                <div>
+                    <div class="title-price">
+                        <h3 class="title">Ford Focus</h3>
+                        <span class="price">2.999 € VB</span>
+                    </div>
+                    <div class="badges"></div>
+                    <p class="summary">✅ Active car listing matching your target search filters.</p>
+                </div>
+                <a href="https://www.kleinanzeigen.de/s-anzeige/ford-focus/3510566091-216-6350" target="_blank" class="btn btn-kleinanzeigen">💬 Message Owner on Kleinanzeigen</a>
+            </div>
+        </div>
+        <div class="card">
+            <div class="img-container">
+                <span class="platform-tag kleinanzeigen">Kleinanzeigen</span>
+                <img src="https://img.kleinanzeigen.de/api/v1/prod-ads/images/d1/d15d8f0b-ad0d-43b5-9be5-5d0ba5cf3c54?rule=$_2.AUTO" class="card-img" alt="Car Image" onerror="this.src='https://via.placeholder.com/400x250?text=No+Photo'">
+            </div>
+            <div class="card-body">
+                <div>
+                    <div class="title-price">
+                        <h3 class="title">Honda Civic Ed Automatik H Kennzeichen</h3>
+                        <span class="price">5.500 € VB</span>
+                    </div>
+                    <div class="badges"><span class="badge">Automatic</span></div>
+                    <p class="summary">✅ Solid automatic transmission listing with good overall features.</p>
+                </div>
+                <a href="https://www.kleinanzeigen.de/s-anzeige/honda-civic-ed-automatik-h-kennzeichen/3492913577-216-6420" target="_blank" class="btn btn-kleinanzeigen">💬 Message Owner on Kleinanzeigen</a>
+            </div>
+        </div>
+        <div class="card">
+            <div class="img-container">
+                <span class="platform-tag kleinanzeigen">Kleinanzeigen</span>
+                <img src="https://img.kleinanzeigen.de/api/v1/prod-ads/images/ae/ae38e9e4-da96-4711-bec3-a9b8ea95cf65?rule=$_2.AUTO" class="card-img" alt="Car Image" onerror="this.src='https://via.placeholder.com/400x250?text=No+Photo'">
+            </div>
+            <div class="card-body">
+                <div>
+                    <div class="title-price">
+                        <h3 class="title">Vw Golf 4 Cabrio 2 0 Highline Schwarz Met Schwarz Leder 115Ps</h3>
+                        <span class="price">6.500 €</span>
+                    </div>
+                    <div class="badges"></div>
+                    <p class="summary">✅ Active car listing matching your target search filters.</p>
+                </div>
+                <a href="https://www.kleinanzeigen.de/s-anzeige/vw-golf-4-cabrio-2-0-highline-schwarz-met-schwarz-leder-115ps/3510309628-216-5525" target="_blank" class="btn btn-kleinanzeigen">💬 Message Owner on Kleinanzeigen</a>
+            </div>
+        </div>
+        <div class="card">
+            <div class="img-container">
+                <span class="platform-tag kleinanzeigen">Kleinanzeigen</span>
+                <img src="https://img.kleinanzeigen.de/api/v1/prod-ads/images/6f/6f65f7fc-9557-4b1e-a382-74736b0f32fe?rule=$_2.AUTO" class="card-img" alt="Car Image" onerror="this.src='https://via.placeholder.com/400x250?text=No+Photo'">
+            </div>
+            <div class="card-body">
+                <div>
+                    <div class="title-price">
+                        <h3 class="title">Mercedes Benz C 63 Amg</h3>
+                        <span class="price">1 €</span>
+                    </div>
+                    <div class="badges"></div>
+                    <p class="summary">✅ Active car listing matching your target search filters.</p>
+                </div>
+                <a href="https://www.kleinanzeigen.de/s-anzeige/mercedes-benz-c-63-amg/3510025826-216-6420" target="_blank" class="btn btn-kleinanzeigen">💬 Message Owner on Kleinanzeigen</a>
+            </div>
+        </div>
+        <div class="card">
+            <div class="img-container">
+                <span class="platform-tag kleinanzeigen">Kleinanzeigen</span>
+                <img src="https://img.kleinanzeigen.de/api/v1/prod-ads/images/cb/cb583e58-1a70-4024-8707-85f2127c2796?rule=$_2.AUTO" class="card-img" alt="Car Image" onerror="this.src='https://via.placeholder.com/400x250?text=No+Photo'">
+            </div>
+            <div class="card-body">
+                <div>
+                    <div class="title-price">
+                        <h3 class="title">Fiat Qubo Benzin 95 555Km Tuev 2028</h3>
+                        <span class="price">2.999 €</span>
+                    </div>
+                    <div class="badges"><span class="badge">TÜV Fresh</span></div>
+                    <p class="summary">✅ Active car listing matching your target search filters.</p>
+                </div>
+                <a href="https://www.kleinanzeigen.de/s-anzeige/fiat-qubo-benzin-95-555km-tuev-2028/3509895854-216-6433" target="_blank" class="btn btn-kleinanzeigen">💬 Message Owner on Kleinanzeigen</a>
+            </div>
+        </div>
+        <div class="card">
+            <div class="img-container">
+                <span class="platform-tag kleinanzeigen">Kleinanzeigen</span>
+                <img src="https://img.kleinanzeigen.de/api/v1/prod-ads/images/d0/d02a912e-55e4-40d7-8b4a-67187416057e?rule=$_2.AUTO" class="card-img" alt="Car Image" onerror="this.src='https://via.placeholder.com/400x250?text=No+Photo'">
+            </div>
+            <div class="card-body">
+                <div>
+                    <div class="title-price">
+                        <h3 class="title">Renault Twingo</h3>
+                        <span class="price">1.750 €</span>
+                    </div>
+                    <div class="badges"></div>
+                    <p class="summary">✅ Active car listing matching your target search filters.</p>
+                </div>
+                <a href="https://www.kleinanzeigen.de/s-anzeige/renault-twingo/3509769510-216-6414" target="_blank" class="btn btn-kleinanzeigen">💬 Message Owner on Kleinanzeigen</a>
+            </div>
+        </div>
+        <div class="card">
+            <div class="img-container">
+                <span class="platform-tag kleinanzeigen">Kleinanzeigen</span>
+                <img src="https://img.kleinanzeigen.de/api/v1/prod-ads/images/44/44981363-fb07-408c-8673-894c110d86a4?rule=$_2.AUTO" class="card-img" alt="Car Image" onerror="this.src='https://via.placeholder.com/400x250?text=No+Photo'">
+            </div>
+            <div class="card-body">
+                <div>
+                    <div class="title-price">
+                        <h3 class="title">Mazda 2 Tuev Au Neu Klima</h3>
+                        <span class="price">1.390 € VB</span>
+                    </div>
+                    <div class="badges"><span class="badge">TÜV Fresh</span><span class="badge">Air Conditioning</span></div>
+                    <p class="summary">✅ Active car listing matching your target search filters.</p>
+                </div>
+                <a href="https://www.kleinanzeigen.de/s-anzeige/mazda-2-tuev-au-neu-klima-/3509587756-216-6425" target="_blank" class="btn btn-kleinanzeigen">💬 Message Owner on Kleinanzeigen</a>
+            </div>
+        </div>
+        <div class="card">
+            <div class="img-container">
+                <span class="platform-tag kleinanzeigen">Kleinanzeigen</span>
+                <img src="https://img.kleinanzeigen.de/api/v1/prod-ads/images/7f/7ffcefb2-1067-4b59-9f4f-99f90b9b758b?rule=$_2.AUTO" class="card-img" alt="Car Image" onerror="this.src='https://via.placeholder.com/400x250?text=No+Photo'">
+            </div>
+            <div class="card-body">
+                <div>
+                    <div class="title-price">
+                        <h3 class="title">Smart Fortwo 451 Passion 89Tkm Klima Tuev 04 28</h3>
+                        <span class="price">3.750 €</span>
+                    </div>
+                    <div class="badges"><span class="badge">TÜV Fresh</span><span class="badge">Air Conditioning</span></div>
+                    <p class="summary">✅ Active car listing matching your target search filters.</p>
+                </div>
+                <a href="https://www.kleinanzeigen.de/s-anzeige/smart-fortwo-451-passion-89tkm-klima-tuev-04-28/3509454673-216-16390" target="_blank" class="btn btn-kleinanzeigen">💬 Message Owner on Kleinanzeigen</a>
+            </div>
+        </div>
+        <div class="card">
+            <div class="img-container">
+                <span class="platform-tag kleinanzeigen">Kleinanzeigen</span>
+                <img src="https://img.kleinanzeigen.de/api/v1/prod-ads/images/94/94e0db90-3a75-4c55-ba3c-ab92a38dbcf5?rule=$_2.AUTO" class="card-img" alt="Car Image" onerror="this.src='https://via.placeholder.com/400x250?text=No+Photo'">
+            </div>
+            <div class="card-body">
+                <div>
+                    <div class="title-price">
+                        <h3 class="title">Mitsubishi Colt Motion Auto Fahranfaenger</h3>
+                        <span class="price">3.500 € VB</span>
+                    </div>
+                    <div class="badges"></div>
+                    <p class="summary">✅ Active car listing matching your target search filters.</p>
+                </div>
+                <a href="https://www.kleinanzeigen.de/s-anzeige/mitsubishi-colt-motion-auto-fahranfaenger/3509393648-216-5982" target="_blank" class="btn btn-kleinanzeigen">💬 Message Owner on Kleinanzeigen</a>
+            </div>
+        </div>
+        <div class="card">
+            <div class="img-container">
+                <span class="platform-tag kleinanzeigen">Kleinanzeigen</span>
+                <img src="https://img.kleinanzeigen.de/api/v1/prod-ads/images/9d/9dd73025-3837-4086-a7b2-4c8df78d18ca?rule=$_2.AUTO" class="card-img" alt="Car Image" onerror="this.src='https://via.placeholder.com/400x250?text=No+Photo'">
+            </div>
+            <div class="card-body">
+                <div>
+                    <div class="title-price">
+                        <h3 class="title">Fiat Panda Tuev Zahnriemen Bremsen Batterie Kundendienst Neu</h3>
+                        <span class="price">2.700 € VB</span>
+                    </div>
+                    <div class="badges"><span class="badge">TÜV Fresh</span><span class="badge">Timing Belt Done</span><span class="badge">New Brakes</span></div>
+                    <p class="summary">🔥 High-value deal: Well maintained with documented service or garage storage.</p>
+                </div>
+                <a href="https://www.kleinanzeigen.de/s-anzeige/fiat-panda-tuev-zahnriemen-bremsen-batterie-kundendienst-neu-/3502582361-216-6078" target="_blank" class="btn btn-kleinanzeigen">💬 Message Owner on Kleinanzeigen</a>
+            </div>
+        </div>
+        <div class="card">
+            <div class="img-container">
+                <span class="platform-tag kleinanzeigen">Kleinanzeigen</span>
+                <img src="https://img.kleinanzeigen.de/api/v1/prod-ads/images/a3/a33a7bc7-8e3d-4332-9036-c401747adaf7?rule=$_2.AUTO" class="card-img" alt="Car Image" onerror="this.src='https://via.placeholder.com/400x250?text=No+Photo'">
+            </div>
+            <div class="card-body">
+                <div>
+                    <div class="title-price">
+                        <h3 class="title">Kia Picanto Edition 7</h3>
+                        <span class="price">4.399 €</span>
+                    </div>
+                    <div class="badges"></div>
+                    <p class="summary">✅ Active car listing matching your target search filters.</p>
+                </div>
+                <a href="https://www.kleinanzeigen.de/s-anzeige/kia-picanto-edition-7/3512090356-216-5589" target="_blank" class="btn btn-kleinanzeigen">💬 Message Owner on Kleinanzeigen</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
