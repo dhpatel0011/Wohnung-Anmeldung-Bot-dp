@@ -26,8 +26,7 @@ CSV_FILE = "results.csv"
 URLS_FILE = "urls.txt"
 
 DEFAULT_URLS = [
-    "https://www.kleinanzeigen.de/s-autos/muenchen/sortierung:neuste/anzeige:angebote/preis::7000/c216l6411r30+autos.km_i:%2C100000+autos.schaden_s:nein+autos.tuevy_i:2028+autos.umweltplakette_s:4_gruen",
-    "https://www.autoscout24.de/lst/ot_gebraucht/eq_garantie?priceto=7000&cy=D&damaged_listing=exclude&desc=0&emclass=4&ensticker=4&kmto=100000&ocs_listing=include&powertype=kw&pricefrom=500&sort=standard&superdeal=true&ustate=N%2CU&atype=C&search_id=1xn121dd5lq"
+   https://www.kleinanzeigen.de/s-autos/muenchen/sortierung:neuste/anbieter:privat/anzeige:angebote/preis::7000/c216l6411r30+autos.anzahl_tueren_s:4_5+autos.km_i:%2C125000+autos.schaden_s:nein+autos.tuevy_i:2028+autos.umweltplakette_s:4_gruen
 ]
 
 def get_driver():
