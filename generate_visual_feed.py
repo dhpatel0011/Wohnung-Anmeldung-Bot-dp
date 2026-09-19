@@ -56,48 +56,73 @@ def extract_key_details_and_summary(title, desc, link):
 
 def generate_html_catalog(input_csv="results.csv", output_html="index.html"):
     if not os.path.exists(input_csv):
-        if os.path.exists("/workspace/knowledge/results.csv"):
-            input_csv = "/workspace/knowledge/results.csv"
-        elif os.path.exists("knowledge/results.csv"):
-            input_csv = "knowledge/results.csv"
-        else:
-            print(f"Error: {input_csv} not found.")
-            return
+        print(f"Error: {input_csv} not found.")
+        return
 
     cards = []
     seen = set()
 
     with open(input_csv, 'r', encoding='utf-8', errors='ignore') as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            link = row.get('link', '').strip() if row.get('link') else ''
-            if not link or link in seen:
-                continue
-            seen.add(link)
+        reader = csv.reader(f)
+        all_rows = [row for row in reader if row]
 
-            raw_title = row.get('title', '').strip() if row.get('title') else ''
-            price_raw = row.get('price', '').strip() if row.get('price') else ''
-            price_num = row.get('price_numeric', '').strip() if row.get('price_numeric') else ''
-            desc = row.get('description', '').strip() if row.get('description') else ''
-            image_url = row.get('image_url', '').strip() if row.get('image_url') else ''
-            platform = row.get('platform', '').strip() if row.get('platform') else ''
+    if not all_rows:
+        print("CSV is empty.")
+        return
 
-            if not platform:
-                platform = "AutoScout24" if "autoscout24" in link else "Kleinanzeigen"
-            else:
-                platform = platform.capitalize()
+    # Determine if row 0 is a header
+    first_row = [c.lower().strip() for c in all_rows]
+    has_header = 'link' in first_row or 'id' in first_row or 'title' in first_row
+    
+    data_rows = all_rows[1:] if has_header else all_rows
 
-            title = clean_car_title(raw_title, link)
-            price = clean_car_price(price_raw, price_num)
-            badges, summary = extract_key_details_and_summary(title, desc, link)
+    for r in data_rows:
+        if len(r) < 6:
+            continue
+        
+        # Smart extraction finding link column wherever it is located
+        link = ''
+        image_url = ''
+        raw_title = ''
+        price_raw = ''
+        price_num = ''
+        desc = ''
+        platform = ''
 
-            if not image_url or not image_url.startswith("http"):
-                image_url = "https://via.placeholder.com/400x250?text=No+Photo"
+        for cell in r:
+            cell_str = cell.strip()
+            if cell_str.startswith('http') and ('kleinanzeigen.de' in cell_str or 'autoscout24' in cell_str):
+                link = cell_str
+            elif cell_str.startswith('http') and ('img' in cell_str or 'image' in cell_str or '.jpg' in cell_str or '.png' in cell_str):
+                image_url = cell_str
 
-            cards.append({
-                'title': title, 'price': price, 'image_url': image_url,
-                'badges': badges, 'summary': summary, 'link': link, 'platform': platform
-            })
+        if not link:
+            # Fallback to positional indices
+            for cell in r:
+                if 'http' in cell and not link:
+                    link = cell.strip()
+
+        if not link or link in seen:
+            continue
+        seen.add(link)
+
+        # Extract remaining fields
+        platform = "Kleinanzeigen" if "kleinanzeigen" in link else "AutoScout24"
+        raw_title = r[4] if len(r) > 2 and not r[4].startswith('http') else (r[5] if len(r) > 1 else '')
+        price_raw = r[6] if len(r) > 3 else (r[4] if len(r) > 2 else '')
+        desc = r[3] if len(r) > 7 else (r[7] if len(r) > 4 else '')
+
+        title = clean_car_title(raw_title, link)
+        price = clean_car_price(price_raw, price_num)
+        badges, summary = extract_key_details_and_summary(title, desc, link)
+
+        if not image_url or not image_url.startswith("http"):
+            image_url = "https://via.placeholder.com/400x250?text=No+Photo"
+
+        cards.append({
+            'title': title, 'price': price, 'image_url': image_url,
+            'badges': badges, 'summary': summary, 'link': link, 'platform': platform
+        })
 
     html = f"""<!DOCTYPE html>
 <html lang="en">
@@ -175,5 +200,4 @@ def generate_html_catalog(input_csv="results.csv", output_html="index.html"):
 
 if __name__ == "__main__":
     generate_html_catalog()
-
 
