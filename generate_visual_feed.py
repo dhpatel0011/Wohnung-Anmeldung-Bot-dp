@@ -68,24 +68,32 @@ def generate_html_catalog(input_csv="results.csv", output_html="index.html"):
     seen = set()
 
     with open(input_csv, 'r', encoding='utf-8', errors='ignore') as f:
-        reader = csv.reader(f)
-        next(reader, None)
-        for r in reader:
-            if len(r) < 8: continue
-            raw_title, price_raw, price_num = r[1], r[2], r[3]
-            desc, link, image_url = r[6], r[7], r[8] if len(r) > 8 else ''
-            
-            if not link or link in seen: continue
+        reader = csv.DictReader(f)
+        for row in reader:
+            link = row.get('link', '').strip()
+            if not link or link in seen:
+                continue
             seen.add(link)
-            
+
+            raw_title = row.get('title', '').strip()
+            price_raw = row.get('price', '').strip()
+            price_num = row.get('price_numeric', '').strip()
+            desc = row.get('description', '').strip()
+            image_url = row.get('image_url', '').strip()
+            platform = row.get('platform', '').strip()
+
+            if not platform:
+                platform = "AutoScout24" if "autoscout24" in link else "Kleinanzeigen"
+            else:
+                platform = platform.capitalize()
+
             title = clean_car_title(raw_title, link)
             price = clean_car_price(price_raw, price_num)
             badges, summary = extract_key_details_and_summary(title, desc, link)
-            platform = "AutoScout24" if "autoscout24" in link else "Kleinanzeigen"
-            
+
             if not image_url or not image_url.startswith("http"):
                 image_url = "https://via.placeholder.com/400x250?text=No+Photo"
-                
+
             cards.append({
                 'title': title, 'price': price, 'image_url': image_url,
                 'badges': badges, 'summary': summary, 'link': link, 'platform': platform
@@ -134,8 +142,8 @@ def generate_html_catalog(input_csv="results.csv", output_html="index.html"):
 
     for item in cards:
         badge_html = "".join([f'<span class="badge">{b}</span>' for b in item['badges']])
-        plat_class = "kleinanzeigen" if item['platform'] == "Kleinanzeigen" else "autoscout24"
-        btn_class = "btn-kleinanzeigen" if item['platform'] == "Kleinanzeigen" else "btn-autoscout24"
+        plat_class = "kleinanzeigen" if item['platform'].lower() == "kleinanzeigen" else "autoscout24"
+        btn_class = "btn-kleinanzeigen" if item['platform'].lower() == "kleinanzeigen" else "btn-autoscout24"
         
         html += f"""
         <div class="card">
