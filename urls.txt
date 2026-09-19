@@ -3,7 +3,7 @@
 # You can add search URLs for Kleinanzeigen, Mobile.de, AutoScout24, etc.
 
 # --- Kleinanzeigen Searches ---
-
+https://www.kleinanzeigen.de/s-autos/88250/sortierung:empfohlen/preis::3500/c216l15340r100+autos.ez_i:2005%2C+autos.km_i:%2C150000+autos.tuevy_i:2027%2C
 
 # --- Example Additional Searches (Uncomment to activate) ---
  
