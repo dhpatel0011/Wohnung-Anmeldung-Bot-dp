@@ -70,17 +70,17 @@ def generate_html_catalog(input_csv="results.csv", output_html="index.html"):
     with open(input_csv, 'r', encoding='utf-8', errors='ignore') as f:
         reader = csv.DictReader(f)
         for row in reader:
-            link = row.get('link', '').strip()
+            link = row.get('link', '').strip() if row.get('link') else ''
             if not link or link in seen:
                 continue
             seen.add(link)
 
-            raw_title = row.get('title', '').strip()
-            price_raw = row.get('price', '').strip()
-            price_num = row.get('price_numeric', '').strip()
-            desc = row.get('description', '').strip()
-            image_url = row.get('image_url', '').strip()
-            platform = row.get('platform', '').strip()
+            raw_title = row.get('title', '').strip() if row.get('title') else ''
+            price_raw = row.get('price', '').strip() if row.get('price') else ''
+            price_num = row.get('price_numeric', '').strip() if row.get('price_numeric') else ''
+            desc = row.get('description', '').strip() if row.get('description') else ''
+            image_url = row.get('image_url', '').strip() if row.get('image_url') else ''
+            platform = row.get('platform', '').strip() if row.get('platform') else ''
 
             if not platform:
                 platform = "AutoScout24" if "autoscout24" in link else "Kleinanzeigen"
