@@ -19,7 +19,7 @@ def clean_car_price(price_raw, price_num):
         if '87.000...' in price_raw: 
             return "€ 5.890 VB"
         return price_raw
-    elif price_num and price_num.isdigit():
+    elif price_num and str(price_num).isdigit():
         val = int(price_num)
         return f"€ {val:,}" if val < 100000 else "€ 5,890"
     return price_raw or "Price on Request"
@@ -56,8 +56,11 @@ def extract_key_details_and_summary(title, desc, link):
 
 def generate_html_catalog(input_csv="results.csv", output_html="index.html"):
     if not os.path.exists(input_csv):
-        print(f"Error: {input_csv} not found.")
-        return
+        if os.path.exists("car_listings.csv"):
+            input_csv = "car_listings.csv"
+        else:
+            print(f"Error: {input_csv} not found.")
+            return
 
     cards = []
     seen = set()
@@ -70,17 +73,16 @@ def generate_html_catalog(input_csv="results.csv", output_html="index.html"):
         print("CSV is empty.")
         return
 
-    # Determine if row 0 is a header
+    # Determine if row 0 is a header (all_rows is the list of cells)
     first_row = [c.lower().strip() for c in all_rows]
-    has_header = 'link' in first_row or 'id' in first_row or 'title' in first_row
+    has_header = any(k in first_row for k in ['link', 'id', 'title', 'price', 'description'])
     
     data_rows = all_rows[1:] if has_header else all_rows
 
     for r in data_rows:
-        if len(r) < 6:
+        if len(r) < 3:
             continue
         
-        # Smart extraction finding link column wherever it is located
         link = ''
         image_url = ''
         raw_title = ''
@@ -89,28 +91,36 @@ def generate_html_catalog(input_csv="results.csv", output_html="index.html"):
         desc = ''
         platform = ''
 
-        for cell in r:
-            cell_str = cell.strip()
-            if cell_str.startswith('http') and ('kleinanzeigen.de' in cell_str or 'autoscout24' in cell_str):
-                link = cell_str
-            elif cell_str.startswith('http') and ('img' in cell_str or 'image' in cell_str or '.jpg' in cell_str or '.png' in cell_str):
-                image_url = cell_str
+        if has_header:
+            header_map = {name: i for i, name in enumerate(first_row)}
+            link = r[header_map['link']].strip() if 'link' in header_map and header_map['link'] < len(r) else ''
+            image_url = r[header_map['image_url']].strip() if 'image_url' in header_map and header_map['image_url'] < len(r) else ''
+            raw_title = r[header_map['title']].strip() if 'title' in header_map and header_map['title'] < len(r) else ''
+            price_raw = r[header_map['price']].strip() if 'price' in header_map and header_map['price'] < len(r) else ''
+            price_num = r[header_map['price_numeric']].strip() if 'price_numeric' in header_map and header_map['price_numeric'] < len(r) else ''
+            desc = r[header_map['description']].strip() if 'description' in header_map and header_map['description'] < len(r) else ''
+            platform = r[header_map['platform']].strip() if 'platform' in header_map and header_map['platform'] < len(r) else ''
 
         if not link:
-            # Fallback to positional indices
             for cell in r:
-                if 'http' in cell and not link:
-                    link = cell.strip()
+                cell_str = cell.strip()
+                if cell_str.startswith('http') and ('kleinanzeigen.de' in cell_str or 'autoscout24' in cell_str or 's-anzeige' in cell_str):
+                    link = cell_str
+                    break
 
         if not link or link in seen:
             continue
         seen.add(link)
 
-        # Extract remaining fields
-        platform = "Kleinanzeigen" if "kleinanzeigen" in link else "AutoScout24"
-        raw_title = r[4] if len(r) > 2 and not r[4].startswith('http') else (r[5] if len(r) > 1 else '')
-        price_raw = r[6] if len(r) > 3 else (r[4] if len(r) > 2 else '')
-        desc = r[3] if len(r) > 7 else (r[7] if len(r) > 4 else '')
+        if not platform:
+            platform = "Kleinanzeigen" if "kleinanzeigen" in link else "AutoScout24"
+        else:
+            platform = platform.capitalize()
+
+        if not raw_title and len(r) > 2:
+            raw_title = r[1]
+        if not price_raw and len(r) > 3:
+            price_raw = r[2]
 
         title = clean_car_title(raw_title, link)
         price = clean_car_price(price_raw, price_num)
@@ -200,4 +210,3 @@ def generate_html_catalog(input_csv="results.csv", output_html="index.html"):
 
 if __name__ == "__main__":
     generate_html_catalog()
-
