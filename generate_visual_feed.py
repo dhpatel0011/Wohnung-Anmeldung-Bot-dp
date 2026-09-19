@@ -19,7 +19,7 @@ def clean_car_price(price_raw, price_num):
         if '87.000...' in price_raw: 
             return "€ 5.890 VB"
         return price_raw
-    elif price_num and price_num.isdigit():
+    elif price_num and str(price_num).isdigit():
         val = int(price_num)
         return f"€ {val:,}" if val < 100000 else "€ 5,890"
     return price_raw or "Price on Request"
@@ -68,51 +68,89 @@ def generate_html_catalog(input_csv="results.csv", output_html="index.html"):
     seen = set()
 
     with open(input_csv, 'r', encoding='utf-8', errors='ignore') as f:
-        reader = csv.reader(f)
-        header = next(reader, None)
+        # Check if file has a header
+        sample = f.read(2048)
+        f.seek(0)
         
-        for r in reader:
-            if len(r) < 8: continue
-            
-            # Detect row schema dynamically (11 columns vs 10 columns)
-            if len(r) >= 11 or (len(r) >= 10 and r[1].lower() in ['kleinanzeigen', 'autoscout24']):
-                platform = r[1]
-                raw_title = r[2]
-                price_raw = r[3]
-                price_num = r[4]
-                desc = r[7]
-                link = r[8]
-                image_url = r[9] if len(r) > 9 else ''
-            else:
-                platform = ''
-                raw_title = r[1]
-                price_raw = r[2]
-                price_num = r[3]
-                desc = r[6]
-                link = r[7]
-                image_url = r[8] if len(r) > 8 else ''
+        has_header = False
+        if 'title' in sample.lower() or 'link' in sample.lower() or 'price' in sample.lower():
+            has_header = True
 
-            link = link.strip()
-            if not link or link in seen:
-                continue
-            seen.add(link)
+        if has_header:
+            reader = csv.DictReader(f)
+            for row in reader:
+                link = row.get('link', '').strip() if row.get('link') else ''
+                if not link or link in seen:
+                    continue
+                seen.add(link)
 
-            if not platform:
-                platform = "AutoScout24" if "autoscout24" in link else "Kleinanzeigen"
-            else:
-                platform = platform.capitalize()
+                raw_title = row.get('title', '').strip() if row.get('title') else ''
+                price_raw = row.get('price', '').strip() if row.get('price') else ''
+                price_num = row.get('price_numeric', '').strip() if row.get('price_numeric') else ''
+                desc = row.get('description', '').strip() if row.get('description') else ''
+                image_url = row.get('image_url', '').strip() if row.get('image_url') else ''
+                platform = row.get('platform', '').strip() if row.get('platform') else ''
 
-            title = clean_car_title(raw_title, link)
-            price = clean_car_price(price_raw, price_num)
-            badges, summary = extract_key_details_and_summary(title, desc, link)
+                if not platform:
+                    platform = "AutoScout24" if "autoscout24" in link else "Kleinanzeigen"
+                else:
+                    platform = platform.capitalize()
 
-            if not image_url or not image_url.startswith("http"):
-                image_url = "https://via.placeholder.com/400x250?text=No+Photo"
+                title = clean_car_title(raw_title, link)
+                price = clean_car_price(price_raw, price_num)
+                badges, summary = extract_key_details_and_summary(title, desc, link)
 
-            cards.append({
-                'title': title, 'price': price, 'image_url': image_url,
-                'badges': badges, 'summary': summary, 'link': link, 'platform': platform
-            })
+                if not image_url or not image_url.startswith("http"):
+                    image_url = "https://via.placeholder.com/400x250?text=No+Photo"
+
+                cards.append({
+                    'title': title, 'price': price, 'image_url': image_url,
+                    'badges': badges, 'summary': summary, 'link': link, 'platform': platform
+                })
+        else:
+            reader = csv.reader(f)
+            for r in reader:
+                if len(r) < 8: continue
+                
+                # Dynamic row index detection
+                if len(r) >= 11 or (len(r) >= 10 and r[1].lower() in ['kleinanzeigen', 'autoscout24']):
+                    platform = r[1]
+                    raw_title = r[2]
+                    price_raw = r[3]
+                    price_num = r[4]
+                    desc = r[7]
+                    link = r[8]
+                    image_url = r[9] if len(r) > 9 else ''
+                else:
+                    platform = ''
+                    raw_title = r[1]
+                    price_raw = r[2]
+                    price_num = r[3]
+                    desc = r[6]
+                    link = r[7]
+                    image_url = r[8] if len(r) > 8 else ''
+
+                link = link.strip()
+                if not link or link in seen:
+                    continue
+                seen.add(link)
+
+                if not platform:
+                    platform = "AutoScout24" if "autoscout24" in link else "Kleinanzeigen"
+                else:
+                    platform = platform.capitalize()
+
+                title = clean_car_title(raw_title, link)
+                price = clean_car_price(price_raw, price_num)
+                badges, summary = extract_key_details_and_summary(title, desc, link)
+
+                if not image_url or not image_url.startswith("http"):
+                    image_url = "https://via.placeholder.com/400x250?text=No+Photo"
+
+                cards.append({
+                    'title': title, 'price': price, 'image_url': image_url,
+                    'badges': badges, 'summary': summary, 'link': link, 'platform': platform
+                })
 
     html = f"""<!DOCTYPE html>
 <html lang="en">
