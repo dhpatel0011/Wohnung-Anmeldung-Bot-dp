@@ -73,7 +73,7 @@ def generate_html_catalog(input_csv="results.csv", output_html="index.html"):
         print("CSV is empty.")
         return
 
-    # Determine if row 0 is a header (all_rows is the list of cells)
+    # Extract column headers from the first row list (all_rows)
     first_row = [c.lower().strip() for c in all_rows]
     has_header = any(k in first_row for k in ['link', 'id', 'title', 'price', 'description'])
     
