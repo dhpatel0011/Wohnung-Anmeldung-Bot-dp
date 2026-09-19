@@ -68,19 +68,34 @@ def generate_html_catalog(input_csv="results.csv", output_html="index.html"):
     seen = set()
 
     with open(input_csv, 'r', encoding='utf-8', errors='ignore') as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            link = row.get('link', '').strip() if row.get('link') else ''
+        reader = csv.reader(f)
+        header = next(reader, None)
+        
+        for r in reader:
+            if len(r) < 8: continue
+            
+            # Detect row schema dynamically (11 columns vs 10 columns)
+            if len(r) >= 11 or (len(r) >= 10 and r[1].lower() in ['kleinanzeigen', 'autoscout24']):
+                platform = r[1]
+                raw_title = r[2]
+                price_raw = r[3]
+                price_num = r[4]
+                desc = r[7]
+                link = r[8]
+                image_url = r[9] if len(r) > 9 else ''
+            else:
+                platform = ''
+                raw_title = r[1]
+                price_raw = r[2]
+                price_num = r[3]
+                desc = r[6]
+                link = r[7]
+                image_url = r[8] if len(r) > 8 else ''
+
+            link = link.strip()
             if not link or link in seen:
                 continue
             seen.add(link)
-
-            raw_title = row.get('title', '').strip() if row.get('title') else ''
-            price_raw = row.get('price', '').strip() if row.get('price') else ''
-            price_num = row.get('price_numeric', '').strip() if row.get('price_numeric') else ''
-            desc = row.get('description', '').strip() if row.get('description') else ''
-            image_url = row.get('image_url', '').strip() if row.get('image_url') else ''
-            platform = row.get('platform', '').strip() if row.get('platform') else ''
 
             if not platform:
                 platform = "AutoScout24" if "autoscout24" in link else "Kleinanzeigen"
