@@ -19,7 +19,7 @@ CSV_FILE = "results.csv"
 URLS_FILE = "urls.txt"
 
 DEFAULT_URLS = [
-   https://www.kleinanzeigen.de/s-autos/muenchen/sortierung:neuste/anbieter:privat/anzeige:angebote/preis::7000/c216l6411r30+autos.anzahl_tueren_s:4_5+autos.km_i:%2C125000+autos.schaden_s:nein+autos.tuevy_i:2028+autos.umweltplakette_s:4_gruen
+"https://www.kleinanzeigen.de/s-autos/88250/sortierung:empfohlen/anbieter:privat/anzeige:angebote/preis::3500/c216l15340r100+autos.ez_i:2005%2C+autos.km_i:%2C150000+autos.schadstoffklasse_s:(euro4%2Ceuro5)+autos.tuevy_i:2027%2C+autos.umweltplakette_s:4_gruen"  
 ]
 
 def get_driver():
