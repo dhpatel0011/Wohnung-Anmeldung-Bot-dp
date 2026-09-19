@@ -7,3 +7,15 @@ https://www.kleinanzeigen.de/s-autos/88250/sortierung:empfohlen/anbieter:privat/
 # --- Example Additional Searches (Uncomment to activate) ---
  
 
+https://www.kleinanzeigen.de/s-autos/muenchen/sortierung:neuste/anbieter:privat/anzeige:angebote/preis::7000/c216l6411r30+autos.anzahl_tueren_s:4_5+autos.km_i:%2C125000+autos.schaden_s:nein+autos.tuevy_i:2028+autos.umweltplakette_s:4_gruen
+
+# ing
+
+https://www.kleinanzeigen.de/s-autos/ingolstadt/sortierung:neuste/anbieter:privat/anzeige:angebote/preis::7000/c216l7586r30+autos.anzahl_tueren_s:4_5+autos.km_i:%2C125000+autos.schaden_s:nein+autos.tuevy_i:2028+autos.umweltplakette_s:4_gruen
+
+#augs
+
+https://www.kleinanzeigen.de/s-autos/augsburg/sortierung:neuste/anbieter:privat/anzeige:angebote/preis::7000/c216l7518r30+autos.anzahl_tueren_s:4_5+autos.km_i:%2C125000+autos.schaden_s:nein+autos.tuevy_i:2028+autos.umweltplakette_s:4_gruen
+
+# --- Example Additional Searches (Uncomment to activate) ---
+ 

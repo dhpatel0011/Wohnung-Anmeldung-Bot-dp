@@ -18,6 +18,10 @@ CACHE_FILE = "seen_cars.json"
 CSV_FILE = "results.csv"
 URLS_FILE = "urls.txt"
 
+DEFAULT_URLS = [
+   https://www.kleinanzeigen.de/s-autos/muenchen/sortierung:neuste/anbieter:privat/anzeige:angebote/preis::7000/c216l6411r30+autos.anzahl_tueren_s:4_5+autos.km_i:%2C125000+autos.schaden_s:nein+autos.tuevy_i:2028+autos.umweltplakette_s:4_gruen
+]
+
 def get_driver():
     options = Options()
     options.add_argument("--headless")
