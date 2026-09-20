@@ -73,7 +73,7 @@ def generate_html_catalog(input_csv="results.csv", output_html="index.html"):
         print("CSV is empty.")
         return
 
-    # Extract column headers from the first row list (all_rows)
+    # Extract column names from the FIRST row list explicitly
     first_row = [c.lower().strip() for c in all_rows]
     has_header = any(k in first_row for k in ['link', 'id', 'title', 'price', 'description'])
     
@@ -118,9 +118,9 @@ def generate_html_catalog(input_csv="results.csv", output_html="index.html"):
             platform = platform.capitalize()
 
         if not raw_title and len(r) > 2:
-            raw_title = r[1]
+            raw_title = r
         if not price_raw and len(r) > 3:
-            price_raw = r[2]
+            price_raw = r
 
         title = clean_car_title(raw_title, link)
         price = clean_car_price(price_raw, price_num)
