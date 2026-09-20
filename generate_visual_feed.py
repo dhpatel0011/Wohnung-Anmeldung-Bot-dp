@@ -7,7 +7,7 @@ def clean_car_title(title, link):
         if 's-anzeige/' in link:
             parts = link.split('s-anzeige/')[-1].split('/')
             if parts: 
-                title = re.sub(r'-+', ' ', parts).title()
+                title = re.sub(r'-+', ' ', parts[0]).title()
         elif 'autoscout24.de' in link:
             parts = [p for p in link.split('/') if p]
             if parts: 
@@ -58,6 +58,8 @@ def generate_html_catalog(input_csv="results.csv", output_html="index.html"):
     if not os.path.exists(input_csv):
         if os.path.exists("car_listings.csv"):
             input_csv = "car_listings.csv"
+        elif os.path.exists("/workspace/artifacts/car_listings.csv"):
+            input_csv = "/workspace/artifacts/car_listings.csv"
         else:
             print(f"Error: {input_csv} not found.")
             return
@@ -73,8 +75,8 @@ def generate_html_catalog(input_csv="results.csv", output_html="index.html"):
         print("CSV is empty.")
         return
 
-    # Extract column names from the FIRST row list explicitly
-    first_row = [c.lower().strip() for c in all_rows]
+    # Extract column names from the FIRST row list explicitly (all_rows[0])
+    first_row = [c.lower().strip() for c in all_rows[0]]
     has_header = any(k in first_row for k in ['link', 'id', 'title', 'price', 'description'])
     
     data_rows = all_rows[1:] if has_header else all_rows
@@ -118,9 +120,9 @@ def generate_html_catalog(input_csv="results.csv", output_html="index.html"):
             platform = platform.capitalize()
 
         if not raw_title and len(r) > 2:
-            raw_title = r
+            raw_title = r[2]
         if not price_raw and len(r) > 3:
-            price_raw = r
+            price_raw = r[3]
 
         title = clean_car_title(raw_title, link)
         price = clean_car_price(price_raw, price_num)
