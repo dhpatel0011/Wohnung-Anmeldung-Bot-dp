@@ -14,15 +14,31 @@ def clean_car_title(title, link):
                 title = parts[-1].replace('-', ' ').title()
     return title.strip() if title else "Vehicle Listing"
 
-def clean_car_price(price_raw, price_num):
-    if price_raw and ('€' in price_raw or 'EUR' in price_raw):
-        if '87.000...' in price_raw: 
+def clean_car_price(price_raw, price_num, title="", desc=""):
+    p_raw = price_raw.strip() if price_raw else ""
+    p_num = str(price_num).strip() if price_num else ""
+    
+    # Check if raw price is zero or invalid placeholder
+    if p_raw in ["0", "€ 0", "0 €", "0€", "0,00 €", "N/A", "null", "None", ""]:
+        p_raw = ""
+        
+    if p_raw and ("€" in p_raw or "EUR" in p_raw or "VB" in p_raw.upper()):
+        if "87.000..." in p_raw: 
             return "€ 5.890 VB"
-        return price_raw
-    elif price_num and str(price_num).isdigit():
-        val = int(price_num)
-        return f"€ {val:,}" if val < 100000 else "€ 5,890"
-    return price_raw or "Price on Request"
+        return p_raw
+    elif p_num.isdigit() and int(p_num) > 0:
+        val = int(p_num)
+        return f"€ {val:,}"
+        
+    # Fallback: Extract price via Regex from Title or Description
+    full_text = f"{title} {desc}"
+    match = re.search(r'(\d{1,3}(?:\.\d{3})+|\d{3,5})\s*€', full_text)
+    if match:
+        val_clean = match.group(1).replace(".", "")
+        if val_clean.isdigit() and 100 <= int(val_clean) <= 150000:
+            return f"€ {int(val_clean):,}"
+            
+    return p_raw if p_raw else "Price on Request"
 
 def extract_key_details_and_summary(title, desc, link):
     full_text = f"{title} {desc} {link}".lower()
@@ -55,27 +71,30 @@ def extract_key_details_and_summary(title, desc, link):
     return badges, summary
 
 def generate_html_catalog(input_csv="results.csv", output_html="index.html"):
-    if not os.path.exists(input_csv):
-        if os.path.exists("car_listings.csv"):
-            input_csv = "car_listings.csv"
-        elif os.path.exists("/workspace/artifacts/car_listings.csv"):
-            input_csv = "/workspace/artifacts/car_listings.csv"
-        else:
-            print(f"Error: {input_csv} not found.")
-            return
+    # Locate candidate CSV file
+    candidate_paths = [input_csv, "car_listings.csv", "/workspace/artifacts/car_listings.csv", "/workspace/artifacts/results.csv"]
+    target_path = None
+    for path in candidate_paths:
+        if os.path.exists(path) and os.path.getsize(path) > 0:
+            target_path = path
+            break
+
+    if not target_path:
+        print(f"Error: No valid non-empty CSV file found among {candidate_paths}")
+        return
 
     cards = []
     seen = set()
 
-    with open(input_csv, 'r', encoding='utf-8', errors='ignore') as f:
+    with open(target_path, 'r', encoding='utf-8', errors='ignore') as f:
         reader = csv.reader(f)
-        all_rows = [row for row in reader if row]
+        all_rows = [row for row in reader if row and any(c.strip() for c in row)]
 
     if not all_rows:
         print("CSV is empty.")
         return
 
-    # Extract column names from the FIRST row list explicitly (all_rows[0])
+    # Safely extract column headers from the FIRST row list explicitly: all_rows[0]
     first_row = [c.lower().strip() for c in all_rows[0]]
     has_header = any(k in first_row for k in ['link', 'id', 'title', 'price', 'description'])
     
@@ -102,7 +121,14 @@ def generate_html_catalog(input_csv="results.csv", output_html="index.html"):
             price_num = r[header_map['price_numeric']].strip() if 'price_numeric' in header_map and header_map['price_numeric'] < len(r) else ''
             desc = r[header_map['description']].strip() if 'description' in header_map and header_map['description'] < len(r) else ''
             platform = r[header_map['platform']].strip() if 'platform' in header_map and header_map['platform'] < len(r) else ''
+        else:
+            # Positional mapping for headerless CSVs
+            if len(r) >= 10:
+                platform, raw_title, price_raw, price_num, desc, link, image_url = r[1], r[2], r[3], r[4], r[7], r[8], r[9]
+            elif len(r) >= 8:
+                platform, raw_title, price_raw, price_num, desc, link, image_url = r[0], r[1], r[2], r[3], r[6], r[7], (r[8] if len(r) > 8 else '')
 
+        # Fallback cell search for misplaced links
         if not link:
             for cell in r:
                 cell_str = cell.strip()
@@ -125,7 +151,7 @@ def generate_html_catalog(input_csv="results.csv", output_html="index.html"):
             price_raw = r[3]
 
         title = clean_car_title(raw_title, link)
-        price = clean_car_price(price_raw, price_num)
+        price = clean_car_price(price_raw, price_num, title, desc)
         badges, summary = extract_key_details_and_summary(title, desc, link)
 
         if not image_url or not image_url.startswith("http"):
